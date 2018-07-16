@@ -1,0 +1,42 @@
+/* Variables */
+
+/* Import */
+
+@import "bootstrap/bootstrap.scss";
+
+/* Document */
+
+body {
+  font-family: "IBM Plex Sans", sans-serif;
+  background-color: $dark;
+  color: $light;
+  margin: 0;
+}
+
+::selection {
+  background-color: $primary;
+}
+
+/* Text */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Username Form */
+
+#username-container {
+  display: none;
+}
+
+/* Channel List */
+
+.channel-name {
+  cursor: pointer;
+}
