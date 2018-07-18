@@ -7,7 +7,7 @@
   <h2>Enter Username</h2>
   <form id="username-form">
     <input type="username" class="form-control" id="username-input"
-    aria-describedby="username" placeholder="enter username">
+    aria-describedby="username" placeholder="enter username" autocomplete="off">
     <button class="btn btn-primary" id="username-submit" type="submit">Submit</button>
   </form>
 </div>
@@ -15,7 +15,7 @@
   <h2>Channels</h2>
   <form id="channel-form">
     <input type="channel" class="form-control" id="channel-input"
-    aria-describedby="channel" placeholder="new channel">
+    aria-describedby="channel" placeholder="new channel" autocomplete="off">
     <button class="btn btn-primary" id="channel-submit" type="submit">Submit</button>
   </form>
   <ul id="channel-list">
@@ -25,9 +25,15 @@
     </li>
     {% endfor %}
   </ul>
-  {% for channel in channel_messages %}
-    {{channel}}
-  {% endfor %}
+</div>
+<div id="message-submission-container">
+  <form id="message-submission-form">
+    <input type="message-submission" class="form-control" id="message-submission-input"
+    aria-describedby="message submission" placeholder="enter message" autocomplete="off">
+    <button class="btn btn-primary" id="message-submission-submit" type="submit">
+      Submit
+    </button>
+  </form>
 </div>
 <div id="messages-container">
 </div>

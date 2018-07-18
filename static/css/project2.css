@@ -8591,11 +8591,6 @@ h6 {
   margin: 0;
 }
 
-/* Username Form */
-#username-container {
-  display: none;
-}
-
 /* Channel List */
 .channel-name {
   cursor: pointer;

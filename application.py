@@ -42,18 +42,6 @@ def channel_creation(data):
         channel_dict["channel_name"] = channel_name
         channel_dict["messages"] = []
 
-        message_submission = {"username": "foo", "content": "bar",
-                              "timestamp": datetime.datetime.now()
-                              .strftime("%B %d, %Y // %I:%M:%S %p")}
-
-        channel_dict["messages"].append(message_submission.copy())
-
-        message_submission = {"username": "foo", "content": "bar",
-                              "timestamp": datetime.datetime.now()
-                              .strftime("%B %d, %Y // %I:%M:%S %p")}
-
-        channel_dict["messages"].append(message_submission.copy())
-
         # add dict to channel messages list
         channel_messages.append(channel_dict)
 
@@ -64,9 +52,50 @@ def channel_creation(data):
 def fetch_messages():
     channel_name = request.json["channel_name"]
 
+    message_submission = {"username": "foo", "content": "bar",
+                          "timestamp": datetime.datetime.now()
+                          .strftime("%B %d, %Y // %I:%M:%S %p")}
+
     for channel in channel_messages:
         if channel["channel_name"] == channel_name:
             fetched_channel_messages = channel["messages"]
+            channel["messages"].append(message_submission.copy())
+
+    print(fetched_channel_messages)
 
     return jsonify({"channel_name": channel_name,
                     "messages": fetched_channel_messages})
+
+
+@socketio.on("message submission")
+def update_messages(data):
+    # capture message data
+    content = data["content"]
+    username = data["username"]
+    channel_name = data["channel_name"]
+
+    # generate serverside timestamp
+    timestamp = datetime.datetime.now().strftime("%B %d, %Y // %I:%M:%S %p")
+
+    message_submission = {"username": username, "content": content,
+                          "timestamp": timestamp}
+
+    # add message to correct channel
+    for channel in channel_messages:
+        if channel["channel_name"] == channel_name:
+            channel["messages"].append(message_submission.copy())
+
+    # sends channel name of updated channel to clients
+    emit("notify new message", channel_name, broadcast=True)
+
+
+@app.route("/fetch_newest_message", methods=["POST"])
+def fetch_newest_message():
+    channel_name = request.json["channel_name"]
+
+    # find the newest message in the current channel
+    for channel in channel_messages:
+        if channel["channel_name"] == channel_name:
+            newest_message = channel["messages"][-1]
+
+    return jsonify(newest_message)

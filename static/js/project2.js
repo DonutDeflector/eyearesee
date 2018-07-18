@@ -5,22 +5,26 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   //
-  // username registration
+  // new user protocol
   //
 
-  // if no username in local storage, allow form to be visible and enabled
-  if (!localStorage.getItem("username")) {
-    document.querySelector("#username-container").style.display = "block";
+  if (localStorage.getItem("username") == null) {
+    document.querySelector("#channel-input").readOnly = true;
+    document.querySelector("#message-submission-input").readOnly = true;
+  } else {
+    document.querySelector("#username-input").readOnly = true;
   }
+
+  //
+  // username registration
+  //
 
   // disable button to prevent blank submissions
   document.querySelector("#username-submit").disabled = true;
 
   // enable submission only if there is content in the input field
   document.querySelector("#username-form").onkeyup = () => {
-    if (document.querySelector("#username-input").value.length > 0)
-      document.querySelector("#username-submit").disabled = false;
-    else document.querySelector("#username-submit").disabled = true;
+    allow_submission("username");
   };
 
   // capture username submission
@@ -29,10 +33,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const username = document.querySelector("#username-input").value;
     localStorage.setItem("username", username);
 
-    // hide and disable form
-    document.querySelector("#username-container").style.display = "none";
-    document.querySelector("#username-input").readOnly = true;
-    document.querySelector("#username-submit").disabled = true;
+    // remove username submission
+    document.querySelector("#username-container").remove();
+
+    // allow message submission and channel creation
+    allow_submission("message-submission");
+    allow_submission("channel");
 
     // prevent form from submitting
     return false;
@@ -47,9 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // enable submission only if there is content in the input field
   document.querySelector("#channel-form").onkeyup = () => {
-    if (document.querySelector("#channel-input").value.length > 0)
-      document.querySelector("#channel-submit").disabled = false;
-    else document.querySelector("#channel-submit").disabled = true;
+    allow_submission("channel");
   };
 
   // set up sockets for form submission
@@ -121,36 +125,119 @@ document.addEventListener("DOMContentLoaded", () => {
   //
 
   function display_messages(data) {
+    const channel_name = data.channel_name;
     const messages = data.messages;
 
     // clear existing messages in container, if any
     document.querySelector("#messages-container").innerHTML = "";
 
+    // add channel name as data attribute to messages container
+    document.querySelector("#messages-container").dataset.name = channel_name;
+
     for (var message of messages) {
-      // generate message card
-      let message_card = document.createElement("div");
-      message_card.classList.add("message-card");
+      const message_card_template = Handlebars.compile(
+        document.querySelector("#message-card").innerHTML
+      );
 
-      // inject content into card
-      let message_username = document.createElement("span");
-      message_username.appendChild(document.createTextNode(message.username));
+      const message_card = message_card_template({
+        username: message.username,
+        timestamp: message.timestamp,
+        content: message.content
+      });
 
-      let message_timestamp = document.createElement("span");
-      message_timestamp.appendChild(document.createTextNode(message.timestamp));
-
-      let message_content = document.createElement("p");
-      message_content.appendChild(document.createTextNode(message.content));
-
-      message_card.appendChild(message_username);
-      message_card.appendChild(message_timestamp);
-      message_card.appendChild(message_content);
+      console.log(message_card);
 
       // add card into messages container
-      document.querySelector("#messages-container").appendChild(message_card);
+      document.querySelector("#messages-container").innerHTML += message_card;
     }
   }
 
   //
   // sending messages
   //
+
+  // disable button to prevent blank submissions
+  document.querySelector("#message-submission-submit").disabled = true;
+
+  // enable submission only if there is content in the input field or username
+  // in local storage
+  document.querySelector("#message-submission-form").onkeyup = () => {
+    allow_submission("message-submission");
+  };
+
+  socket.on("connect", () => {
+    document.querySelector("#message-submission-form").onsubmit = () => {
+      const content = document.querySelector("#message-submission-input").value;
+      const username = localStorage.getItem("username");
+      const channel_name = document.querySelector("#messages-container").dataset
+        .name;
+
+      // emit channel creation
+      socket.emit("message submission", {
+        content: content,
+        username: username,
+        channel_name: channel_name
+      });
+
+      // clear form and disable submission
+      document.querySelector("message-submission-input").value = "";
+      document.querySelector("message-submission-submit").disabled = true;
+
+      // prevent form from submitting
+      return false;
+    };
+  });
+
+  socket.on("notify new message", data => {
+    const channel_updated = data;
+    const channel_name = document.querySelector("#messages-container").dataset
+      .name;
+
+    // if the channel updated matches the current channel, request the new
+    // message
+    if (channel_updated == channel_name) {
+      const request = new XMLHttpRequest();
+
+      request.open("POST", "/fetch_newest_message");
+      request.setRequestHeader("Content-Type", "application/json");
+
+      request.onload = () => {
+        const data = JSON.parse(request.responseText);
+        alert(data);
+      };
+
+      const data = JSON.stringify({ channel_name: channel_name });
+      request.send(data);
+    }
+  });
+
+  //
+  // helper functions
+  //
+
+  function allow_submission(form) {
+    const input = form + "-input";
+    const submit = form + "-submit";
+
+    if (document.getElementById(input).value.length > 0)
+      document.getElementById(submit).disabled = false;
+    else document.getElementById(submit).disabled = true;
+  }
+
+  function display_message_card(message) {
+    const message_card_template = Handlebars.compile(
+      document.querySelector("#message-card").innerHTML
+    );
+
+    const message_card = message_card_template({
+      username: message.username,
+      timestamp: message.timestamp,
+      content: message.content
+    });
+
+    console.log(message_card);
+
+    // add card into messages container
+    document.querySelector("#messages-container").appendChild(message_card);
+  }
 });
