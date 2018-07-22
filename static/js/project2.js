@@ -8,41 +8,116 @@ document.addEventListener("DOMContentLoaded", () => {
   // new user protocol
   //
 
+  // disable channel and message submission if no username has been chosen
   if (localStorage.getItem("username") == null) {
     document.querySelector("#channel-input").readOnly = true;
     document.querySelector("#message-submission-input").readOnly = true;
   } else {
-    document.querySelector("#username-input").readOnly = true;
+    document.querySelector("#username-container").remove();
+  }
+
+  //
+  // returning user protocol
+  //
+
+  // if current channel exists in local storage, display messages from channel
+  if (localStorage.getItem("current_channel") != null) {
+    const current_channel = localStorage.getItem("current_channel");
+
+    document.querySelector(
+      "#messages-container"
+    ).dataset.name = current_channel;
+
+    set_channel_header(current_channel);
+    fetch_messages(current_channel);
   }
 
   //
   // username registration
   //
 
-  // disable button to prevent blank submissions
-  document.querySelector("#username-submit").disabled = true;
+  // only runs when username has not been set
+  if (localStorage.getItem("username") == null) {
+    // disable button to prevent blank submissions
+    document.querySelector("#username-submit").disabled = true;
 
-  // enable submission only if there is content in the input field
-  document.querySelector("#username-form").onkeyup = () => {
-    allow_submission("username");
-  };
+    // enable submission only if there is content in the input field
+    document.querySelector("#username-form").onkeyup = () => {
+      allow_submission("username");
+    };
 
-  // capture username submission
-  document.querySelector("#username-form").onsubmit = () => {
-    // store input in local storage
-    const username = document.querySelector("#username-input").value;
-    localStorage.setItem("username", username);
+    // capture username submission
+    document.querySelector("#username-form").onsubmit = () => {
+      // store input in local storage
+      const username = document.querySelector("#username-input").value;
+      localStorage.setItem("username", username);
 
-    // remove username submission
-    document.querySelector("#username-container").remove();
+      // add user to server-side users list
+      socket.emit("username registration", {
+        username: username
+      });
 
-    // allow message submission and channel creation
-    allow_submission("message-submission");
-    allow_submission("channel");
+      // remove username submission
+      document.querySelector("#username-container").remove();
 
-    // prevent form from submitting
-    return false;
-  };
+      // allow message and channel input
+      document.querySelector("#channel-input").readOnly = false;
+      document.querySelector("#message-submission-input").readOnly = false;
+
+      // prevent form from submitting
+      return false;
+    };
+  }
+
+  //
+  // user list
+  //
+
+  // when a username is registered, this will add the new user to the list
+  socket.on("fetch newest user", data => {
+    const username = data.username;
+    const status = data.status;
+
+    const user_list_entry_template = Handlebars.compile(
+      document.querySelector("#user-list-entry").innerHTML
+    );
+
+    const user_list_entry = user_list_entry_template({
+      username: username,
+      status: status
+    });
+
+    document.querySelector("#user-list").innerHTML += user_list_entry;
+  });
+
+  //
+  // user status
+  //
+
+  // send status change to the server
+  function set_status() {
+    username = localStorage.getItem("username");
+    status = document.querySelector("#user-status-select").value;
+
+    socket.emit("update status", { username: username, status: status });
+  }
+
+  // update status changes
+  socket.on("fetch updated status", data => {
+    const username = data.username;
+    const status = data.status;
+
+    const user_entry_status = document
+      .querySelector("#user-" + username)
+      .querySelector(".user-status");
+
+    user_entry_status.innerHTML = "(" + status + ")";
+  });
+
+  // listen for change in status by the user
+  document
+    .querySelector("#user-status-select")
+    .addEventListener("change", set_status);
 
   //
   // channel creation
@@ -102,21 +177,19 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .querySelector("#channel-list")
     .addEventListener("click", function(e) {
-      // if user clicks on li, initiates ajax request to fetch messages
+      // if user clicks on li, fetch message with ajax and store clicked channel
       if (e.target && e.target.nodeName == "LI") {
-        const request = new XMLHttpRequest();
+        // store channel that was clicked on
         const channel_name = e.target.dataset.name;
 
-        request.open("POST", "/fetch_messages");
-        request.setRequestHeader("Content-Type", "application/json");
+        // set channel name header to clicked channel
+        set_channel_header(channel_name);
 
-        request.onload = () => {
-          const data = JSON.parse(request.responseText);
-          display_messages(data);
-        };
+        // add channel to local storage
+        localStorage.setItem("current_channel", channel_name);
 
-        const data = JSON.stringify({ channel_name: channel_name });
-        request.send(data);
+        // ajax request to fetch messages
+        fetch_messages(channel_name);
       }
     });
 
@@ -135,20 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector("#messages-container").dataset.name = channel_name;
 
     for (var message of messages) {
-      const message_card_template = Handlebars.compile(
-        document.querySelector("#message-card").innerHTML
-      );
-
-      const message_card = message_card_template({
-        username: message.username,
-        timestamp: message.timestamp,
-        content: message.content
-      });
-
-      console.log(message_card);
-
-      // add card into messages container
-      document.querySelector("#messages-container").innerHTML += message_card;
+      display_message_card(message);
     }
   }
 
@@ -180,10 +240,10 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       // clear form and disable submission
-      document.querySelector("message-submission-input").value = "";
-      document.querySelector("message-submission-submit").disabled = true;
+      document.querySelector("#message-submission-input").value = "";
+      document.querySelector("#message-submission-submit").disabled = true;
 
-      // prevent form from submitting
+      // present form from submitting
       return false;
     };
   });
@@ -203,7 +263,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       request.onload = () => {
         const data = JSON.parse(request.responseText);
-        alert(data);
+        display_message_card(data);
+        limit_messages_displayed(100);
       };
 
       const data = JSON.stringify({ channel_name: channel_name });
@@ -219,6 +280,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const input = form + "-input";
     const submit = form + "-submit";
 
+    // only allow submission if form isn't empty
     if (document.getElementById(input).value.length > 0)
       document.getElementById(submit).disabled = false;
     else document.getElementById(submit).disabled = true;
@@ -229,15 +291,42 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelector("#message-card").innerHTML
     );
 
+    // generate message card
     const message_card = message_card_template({
       username: message.username,
       timestamp: message.timestamp,
       content: message.content
     });
 
-    console.log(message_card);
-
     // add card into messages container
-    document.querySelector("#messages-container").appendChild(message_card);
+    document.querySelector("#messages-container").innerHTML += message_card;
+  }
+
+  function fetch_messages(channel_name) {
+    const request = new XMLHttpRequest();
+
+    request.open("POST", "/fetch_messages");
+    request.setRequestHeader("Content-Type", "application/json");
+
+    request.onload = () => {
+      const data = JSON.parse(request.responseText);
+      display_messages(data);
+    };
+
+    const data = JSON.stringify({ channel_name: channel_name });
+    request.send(data);
+  }
+
+  function limit_messages_displayed(limit_count) {
+    const messages_container = document.querySelector("#messages-container");
+    const oldest_message = document.querySelector(".message-card");
+
+    if (messages_container.childElementCount > limit_count) {
+      oldest_message.remove();
+    }
+  }
+
+  function set_channel_header(channel_name) {
+    document.querySelector("#channel-name").innerHTML = channel_name;
   }
 });

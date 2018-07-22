@@ -1,3 +1,6 @@
+{% set handlebars = ["handlebars/message_card.html",
+                     "handlebars/user-list-entry.html"] %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +8,8 @@
   <title>EyeAreSee // {{page_name}}</title>
   <meta charset="utf-8">
   <link rel="stylesheet" href="{{ url_for('static',filename='css/project2.css') }}">
-  <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,700" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,700"
+  rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js"></script>
   <script src="{{ url_for('static',filename='js/project2.js') }}"></script>
@@ -15,18 +19,11 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"
   integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"
   crossorigin="anonymous"></script>
+  {% for file in handlebars %}
+    {% include file %}
+  {% endfor %}
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script id="message-card" type="text/x-handlebars-template">
-  <div class="message-card">
-    {% raw -%}
-    <h4>{{username}}</h4>
-    <span>{{timestamp}}</span>
-    <p>{{content}}</p>
-    {%- endraw %}
-  </div>
-  </script>
 </head>
-
 <body>
   {% block body %}
   {% endblock %}
