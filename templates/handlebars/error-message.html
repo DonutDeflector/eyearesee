@@ -1,0 +1,11 @@
+<script id="error-message" type="text/x-handlebars-template">
+<div id="error-message-container" class="d-flex flex-column justify-content-center">
+  <h2 class="mb-3">Error!</h2>
+  {% raw -%}
+  <p>{{ content }}</p>
+  {%- endraw %}
+  <div class="d-flex justify-content-end">
+    <button id="error-message-close" class="btn btn-primary">Close</button>
+  </div>
+</div>
+</script>

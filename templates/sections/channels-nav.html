@@ -1,0 +1,26 @@
+<div id="channel-container" class="sidenav sidenav-left bg-secondary">
+  <div class="container">
+    <span id="channel-close" class="btn-close btn-close-right">&times;</span>
+    <h2 class="mb-2">Channels</h2>
+    <form id="channel-form">
+      <div class="form-row">
+        <div class="form-group col-8 mb-0">
+          <input type="channel" class="form-control" id="channel-input"
+          aria-describedby="channel" placeholder="new channel" autocomplete="off">
+        </div>
+        <div class="form-group col-4 mb-0">
+          <button class="btn btn-primary" id="channel-submit" type="submit">
+            Submit
+          </button>
+        </div>
+      </div>
+    </form>
+    <ul id="channel-list" class="pl-0">
+      {% for channel in channel_list %}
+      <li id="{{ channel }}" class="channel-name" data-name="{{ channel }}">
+        {{ channel }}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>

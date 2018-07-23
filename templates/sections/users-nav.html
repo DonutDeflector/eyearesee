@@ -1,0 +1,19 @@
+<div id="user-container" class="sidenav sidenav-right bg-secondary d-flex
+flex-column justify-content-between">
+  <div class="container text-right">
+    <span id="users-close" class="btn-close btn-close-left">&times;</span>
+    <h2>Users</h2>
+    <ul id="user-list" class="pl-0">
+      {% for user in user_list %}
+        <li id="user-{{ user.username }}" class="d-flex justify-content-end
+        align-items-center" data-name="{{ user.username }}">
+          <span class="user-username mr-2">{{ user.username }}</span>
+          <div class="user-status status-circle
+          status-circle-{{ user.status.lower() }}" title="{{ user.status }}">
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% include "sections/registered-as.html" %}
+</div>

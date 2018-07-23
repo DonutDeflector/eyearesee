@@ -1,11 +1,13 @@
-{% set handlebars = ["handlebars/message_card.html",
+{% set handlebars = ["handlebars/error-message.html",
+                     "handlebars/message_card.html",
+                     "handlebars/no-messages-alert.html",
                      "handlebars/user-list-entry.html"] %}
 
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <title>EyeAreSee // {{page_name}}</title>
+  <title>EyeAreSee</title>
   <meta charset="utf-8">
   <link rel="stylesheet" href="{{ url_for('static',filename='css/project2.css') }}">
   <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,700"

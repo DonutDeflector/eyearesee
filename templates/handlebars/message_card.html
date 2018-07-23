@@ -1,9 +1,11 @@
 <script id="message-card" type="text/x-handlebars-template">
-<div class="message-card">
+<div class="message-card pt-3 pb-2 border-bottom">
   {% raw -%}
-  <h4>{{username}}</h4>
-  <span>{{timestamp}}</span>
-  <p>{{content}}</p>
+  <h4 class="message-username mb-2">{{ username }}</h4>
+  <p class="message-content">{{ content }}</p>
+  <div class="d-flex justify-content-end">
+    <span class="message-timestamp bg-secondary p-1">{{ timestamp }}</span>
+  </div>
 {%- endraw %}
 </div>
 </script>

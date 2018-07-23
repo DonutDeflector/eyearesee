@@ -1,8 +1,11 @@
 <script id="user-list-entry" type="text/x-handlebars-template">
 {% raw -%}
-<li id="user-{{ username }}" data-name="{{ username }}">
-  <span class="user-username">{{ username }}</span>
-  <span class="user-status">({{ status }})</span>
-</li>
+  <li id="user-{{ username }}" class="d-flex justify-content-end
+  align-items-center" data-name="{{ username }}">
+    <span class="user-username mr-2">{{ username }}</span>
+    <div class="user-status status-circle
+    status-circle-{{ toLowerCase status }}" title="{{ status }}">
+    </div>
+  </li>
 {%- endraw %}
 </script>

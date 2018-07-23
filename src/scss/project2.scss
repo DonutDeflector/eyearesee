@@ -1,15 +1,33 @@
 /* Variables */
+
+$primary: #44486b;
+$secondary: #32354f;
+
 $dark: #222435;
 $light: #f7f5ef;
 
 $black: #222435;
 $white: #f7f5ef;
 
+$shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+$shadow2: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+
 $font-family-base: "IBM Plex Sans", sans-serif;
 
 /* Import */
 
 @import "bootstrap/bootstrap.scss";
+
+/* Animations */
+
+@keyframes fade {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
 
 /* Document */
 
@@ -20,7 +38,7 @@ body {
 }
 
 ::selection {
-  background-color: $primary;
+  background-color: lighten($primary, 50%);
 }
 
 /* Text */
@@ -38,24 +56,240 @@ h6 {
 /* Container */
 
 .container {
+  max-width: 100%;
   padding: 0 10px;
+}
+
+/* Scrollbar */
+
+::-webkit-scrollbar {
+  width: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: $secondary;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: lighten($primary, 15%);
 }
 
 /* Username */
 
 #username-container {
-  z-index: 1000;
+  z-index: 100000;
   position: absolute;
+  top: 0;
+  left: 0;
   height: 100vh;
   width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background-color: rgba($dark, 0.9);
+  background-color: rgba($dark, 0.95);
+  animation-name: fade;
+  animation-play-state: paused;
+  animation-fill-mode: forwards;
+  animation-duration: 1s;
+}
+
+/* Navbar */
+
+header {
+  z-index: 1000;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  background-color: $dark;
+  box-shadow: $shadow;
+
+  .d-flex {
+    height: 58px;
+  }
+}
+
+#channel-name-container {
+  overflow: hidden;
+}
+
+#channel-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-open {
+  cursor: pointer;
 }
 
 /* Channel List */
 
 .channel-name {
   cursor: pointer;
+}
+
+#channel-list {
+  li {
+    list-style: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid $light;
+    padding-bottom: 10px;
+    padding-top: 10px;
+    width: 100%;
+  }
+
+  li:hover,
+  li:focus {
+    transform: translateX(10px);
+    width: calc(100% - 10px);
+  }
+
+  li::before {
+    content: "#";
+  }
+}
+
+/* User List */
+
+#user-list li {
+  list-style: none;
+  white-space: nowrap;
+}
+
+.status-circle {
+  display: inline-block;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  transition: 0.5s;
+}
+
+.status-circle-online {
+  background-color: $success;
+}
+
+.status-circle-idle {
+  background-color: $warning;
+}
+
+.status-circle-busy {
+  background-color: $danger;
+}
+
+/* Chat */
+
+#chat-container {
+  margin-top: 58px;
+  height: calc(100vh - 58px);
+}
+
+/* Messages */
+
+#messages-container {
+  overflow-y: scroll;
+  height: 100%;
+  max-width: 960px;
+}
+
+.no-messages-alert {
+  height: auto;
+}
+
+#registered-as-container {
+  position: relative;
+  bottom: 0;
+  padding: 10px;
+}
+
+.message-timestamp {
+  font-size: 0.75rem;
+}
+
+/* Side Navigation */
+
+.sidenav {
+  height: 100%;
+  position: fixed;
+  z-index: 10000;
+  width: 0;
+  top: 0;
+  opacity: 0;
+  padding-top: 10px;
+  background-color: $dark;
+  overflow-x: hidden;
+  box-shadow: $shadow;
+  transition: 0.5s;
+}
+
+.sidenav-left {
+  left: 0;
+}
+
+.sidenav-right {
+  right: 0;
+}
+
+/* Forms */
+
+.custom-select,
+.form-control,
+.input-group-text {
+  border-radius: 0;
+}
+
+/* Buttons */
+
+.btn {
+  border-radius: 0;
+}
+
+.btn-primary:not(:disabled):not(.disabled):focus,
+.btn-primary:not(:disabled):not(.disabled):hover,
+.show > .btn-primary.dropdown-toggle {
+  background-color: lighten($primary, 15%);
+}
+
+.btn-full-width {
+  width: 100%;
+}
+
+.btn-close {
+  position: absolute;
+  font-size: 36px;
+  cursor: pointer;
+}
+
+.btn-close-right {
+  top: 0;
+  right: 0;
+  margin-right: 10px;
+}
+
+.btn-close-left {
+  top: 0;
+  left: 0;
+  margin-left: 10px;
+}
+
+/* Error Message */
+
+#error-message-wrapper {
+  z-index: -1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba($dark, 0.9);
+  opacity: 0;
+  transition: all 0.5s ease;
+}
+
+#error-message-container {
+  padding: 10px;
+  min-width: 300px;
+  background-color: $secondary;
 }

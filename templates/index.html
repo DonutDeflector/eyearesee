@@ -1,62 +1,18 @@
-{% set page_name = "Index" %}
-
 {% extends "layouts/default.html" %}
 
 {% block body %}
-{% include "sections/username.html" %}
-<div id="channel-container">
-  <h2>Channels</h2>
-  <form id="channel-form">
-    <input type="channel" class="form-control" id="channel-input"
-    aria-describedby="channel" placeholder="new channel" autocomplete="off">
-    <button class="btn btn-primary" id="channel-submit" type="submit">Submit</button>
-  </form>
-  <ul id="channel-list">
-    {% for channel in channel_list %}
-    <li id="{{ channel }}" class="channel-name" data-name="{{ channel }}">
-      {{ channel }}
-    </li>
-    {% endfor %}
-  </ul>
-</div>
-<div id="user-container">
-  <h2>Users</h2>
-  <ul id="user-list">
-    {% for user in user_list %}
-      <li id="user-{{ user.username }}" data-name="{{ user.username }}">
-        <span class="user-username">{{ user.username }}</span>
-        <span class="user-status">({{ user.status }})</span>
-      </li>
-    {% endfor %}
-  </ul>
-</div>
-<div id="message-submission-container">
-  <h2>Messages</h2>
-  <form id="message-submission-form">
-    <input type="message-submission" class="form-control" id="message-submission-input"
-    aria-describedby="message submission" placeholder="enter message" autocomplete="off">
-    <button class="btn btn-primary" id="message-submission-submit" type="submit">
-      Submit
-    </button>
-  </form>
-</div>
-<div id="user-status-container">
-  <h2>Status</h2>
-  <div class="input-group mb-2">
-    <div class="input-group-prepend">
-      <label class="input-group-text">Status</label>
+{% include "sections/error-message.html" %}
+{% include "sections/username-registration.html" %}
+{% include "sections/navbar.html" %}
+{% include "sections/channels-nav.html" %}
+{% include "sections/users-nav.html" %}
+<div id="chat-container" class="d-flex flex-column-reverse">
+  <div class="bottom-bar">
+    <div class="container">
+      {% include "sections/status-selection.html" %}
+      {% include "sections/message-submission.html" %}
     </div>
-    <select id="user-status-select" class="custom-select">
-      <option value="Online" selected>Online</option>
-      <option value="Idle">Idle</option>
-      <option value="Busy">Busy</option>
-      <option value="Do Not Disturb">Do Not Disturb</option>
-    </select>
   </div>
-</div>
-<div id="channel-name-container">
-  <h2 id="channel-name"></h2>
-</div>
-<div id="messages-container">
+  {% include "sections/messages.html" %}
 </div>
 {% endblock %}
