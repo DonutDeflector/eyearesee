@@ -2,7 +2,8 @@
 flex-column justify-content-between">
   <div class="container text-right">
     <span id="users-close" class="btn-close btn-close-left">&times;</span>
-    <h2>Users</h2>
+    <h2 class="mb-2">Users</h2>
+    {% include "includes/status-selection.html" %}
     <ul id="user-list" class="pl-0">
       {% for user in user_list %}
         <li id="user-{{ user.username }}" class="d-flex justify-content-end
@@ -15,5 +16,5 @@ flex-column justify-content-between">
       {% endfor %}
     </ul>
   </div>
-  {% include "sections/registered-as.html" %}
+  {% include "includes/registered-as.html" %}
 </div>

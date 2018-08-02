@@ -1,18 +1,17 @@
 {% extends "layouts/default.html" %}
 
 {% block body %}
-{% include "sections/error-message.html" %}
-{% include "sections/username-registration.html" %}
-{% include "sections/navbar.html" %}
-{% include "sections/channels-nav.html" %}
-{% include "sections/users-nav.html" %}
+{% include "includes/error-message.html" %}
+{% include "includes/username-registration.html" %}
+{% include "includes/navbar.html" %}
+{% include "includes/channels-nav.html" %}
+{% include "includes/users-nav.html" %}
 <div id="chat-container" class="d-flex flex-column-reverse">
   <div class="bottom-bar">
     <div class="container">
-      {% include "sections/status-selection.html" %}
-      {% include "sections/message-submission.html" %}
+      {% include "includes/message-submission.html" %}
     </div>
   </div>
-  {% include "sections/messages.html" %}
+  {% include "includes/messages.html" %}
 </div>
 {% endblock %}

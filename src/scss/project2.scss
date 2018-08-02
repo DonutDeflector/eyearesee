@@ -76,7 +76,7 @@ h6 {
 
 /* Username */
 
-#username-container {
+#username-wrapper {
   z-index: 100000;
   position: absolute;
   top: 0;
@@ -91,6 +91,10 @@ h6 {
   animation-play-state: paused;
   animation-fill-mode: forwards;
   animation-duration: 1s;
+}
+
+#username-container {
+  max-width: 568px;
 }
 
 /* Navbar */
@@ -179,6 +183,12 @@ header {
   background-color: $danger;
 }
 
+#registered-as-container {
+  position: relative;
+  bottom: 0;
+  padding: 10px;
+}
+
 /* Chat */
 
 #chat-container {
@@ -194,14 +204,12 @@ header {
   max-width: 960px;
 }
 
-.no-messages-alert {
-  height: auto;
+.message-content {
+  word-wrap: break-word;
 }
 
-#registered-as-container {
-  position: relative;
-  bottom: 0;
-  padding: 10px;
+#message-container .no-messages-alert {
+  height: auto;
 }
 
 .message-timestamp {
@@ -230,6 +238,14 @@ header {
 
 .sidenav-right {
   right: 0;
+}
+
+/* Bottom Bar */
+
+.bottom-bar {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
 }
 
 /* Forms */

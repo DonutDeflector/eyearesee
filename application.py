@@ -180,7 +180,7 @@ def update_messages(data):
     channel_name = data["channel_name"]
 
     # generate serverside timestamp
-    timestamp = datetime.datetime.now().strftime("%I:%M %p // %Y-%d-%m")
+    timestamp = datetime.datetime.now().strftime("%I:%M:%S %p // %Y-%d-%m")
 
     # generate message submission
     message_submission = {"username": username, "content": content,

@@ -11,12 +11,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // new user protocol
   //
 
-  // disable channel and message submission if no username has been chosen
+  // if no username registered, disable channel and message submission, else
+  // remove username registration container
   if (localStorage.getItem("username") == null) {
     document.querySelector("#channel-input").readOnly = true;
     document.querySelector("#message-submission-input").readOnly = true;
   } else {
-    document.querySelector("#username-container").remove();
+    document.querySelector("#username-wrapper").remove();
   }
 
   //
@@ -24,20 +25,24 @@ document.addEventListener("DOMContentLoaded", () => {
   //
 
   // if current channel exists in local storage, display messages from channel
+  // else, display an alert
   if (localStorage.getItem("current_channel") != null) {
+    // get channel from local storage
     const current_channel = localStorage.getItem("current_channel");
 
+    // set data name of messages container to current channel
     document.querySelector(
       "#messages-container"
     ).dataset.name = current_channel;
 
+    // set the channel header and get the messages of the current channel
     set_channel_header(current_channel);
     fetch_messages(current_channel);
   } else {
     const title = "Nothing to see here.";
     const content =
       "Create a channel and start a conversation or join an existing channel \
-      and join the conversation.";
+      and join the conversation. Just click the icon at the top left!";
 
     display_no_messages_alert(title, content);
   }
@@ -55,12 +60,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = JSON.parse(request.responseText);
       const status = data["status"];
 
+      // set selection status according to the last status set
       document.querySelector("#user-status-select").value = status;
     };
 
+    // send username as a variable
     const data = JSON.stringify({ username: username });
     request.send(data);
 
+    // display username in sidebar
     document.querySelector("#username").innerHTML = username;
   }
 
@@ -90,8 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       // clear input, disable blank submissions
-      document.querySelector("#username-input").value = "";
-      document.querySelector("#username-submit").disabled = true;
+      reset_form("username");
 
       // prevent form from submitting
       return false;
@@ -105,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("username", username);
 
     // fade out and remove username submission
-    const username_container = document.querySelector("#username-container");
+    const username_container = document.querySelector("#username-wrapper");
     username_container.style.animationPlayState = "running";
     username_container.addEventListener("animationend", () => {
       username_container.remove();
@@ -114,9 +121,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // display username
     document.querySelector("#username").innerHTML = username;
 
-    // allow message and channel input
+    // allow channel input
     document.querySelector("#channel-input").readOnly = false;
-    document.querySelector("#message-submission-input").readOnly = false;
   });
 
   //
@@ -144,11 +150,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // user menu
   //
 
+  // when user icon clicked, open menu
   document.querySelector("#users-icon").addEventListener("click", () => {
     document.querySelector("#user-container").style.width = "300px";
     document.querySelector("#user-container").style.opacity = "1";
   });
 
+  // when close icon clicked, close menu
   document.querySelector("#users-close").addEventListener("click", () => {
     document.querySelector("#user-container").style.width = "0";
     document.querySelector("#user-container").style.opacity = "0";
@@ -209,13 +217,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const channel_name = document
         .querySelector("#channel-input")
         .value.toLowerCase();
-
+      document.querySelector("#channel-input").value = "";
+      document.querySelector("#channel-submit").disabled = true;
       // emit channel creation
       socket.emit("channel creation", { channel_name: channel_name });
 
       // clear form and disable submission
-      document.querySelector("#channel-input").value = "";
-      document.querySelector("#channel-submit").disabled = true;
+      reset_form("channel");
 
       // present form from submitting
       return false;
@@ -244,7 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector("#channel-list").appendChild(channel);
   });
 
-  // event listen on list for dynamically generated lis
+  // event listen on list as workaround for dynamically generated lis
   document
     .querySelector("#channel-list")
     .addEventListener("click", function(e) {
@@ -279,11 +287,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // channel menu
   //
 
+  // when channel icon clicked, open menu
   document.querySelector("#channels-icon").addEventListener("click", () => {
     document.querySelector("#channel-container").style.width = "300px";
     document.querySelector("#channel-container").style.opacity = "1";
   });
 
+  // when close icon clicked, close menu
   document.querySelector("#channel-close").addEventListener("click", () => {
     document.querySelector("#channel-container").style.width = "0";
     document.querySelector("#channel-container").style.opacity = "0";
@@ -303,7 +313,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // add channel name as data attribute to messages container
     document.querySelector("#messages-container").dataset.name = channel_name;
 
-    // unless there are no messages in the channel, display messages normally
+    // if there are no messages in the channel display alert, else display
+    // messages normally
     if (messages.length == 0) {
       const title = "A fresh start.";
       const content =
@@ -321,6 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const messages_container = document.querySelector("#messages-container");
   const observer = new MutationObserver(scrollToBottom);
   const config = { childList: true };
+
   observer.observe(messages_container, config);
 
   function scrollToBottom() {
@@ -361,8 +373,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       // clear form and disable submission
-      document.querySelector("#message-submission-input").value = "";
-      document.querySelector("#message-submission-submit").disabled = true;
+      reset_form("message-submission");
 
       // present form from submitting
       return false;
@@ -384,6 +395,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       request.onload = () => {
         const data = JSON.parse(request.responseText);
+
+        // display new message and limit total messages displayed to 100
         display_message_card(data);
         limit_messages_displayed(100);
       };
@@ -509,10 +522,19 @@ document.addEventListener("DOMContentLoaded", () => {
   function remove_no_messages_alert() {
     const no_messages_alert = document.querySelector(".no-messages-alert");
 
-    // if the no messages alert exists, remove
+    // if the no messages alert exists, remove it
     if (no_messages_alert != null) {
       no_messages_alert.remove();
     }
+  }
+
+  function reset_form(form) {
+    const input = form + "-input";
+    const submit = form + "-submit";
+
+    // clear input, disable blank submissions
+    document.getElementById(input).value = "";
+    document.getElementById(submit).disabled = true;
   }
 
   //
