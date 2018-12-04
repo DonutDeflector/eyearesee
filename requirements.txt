@@ -4,3 +4,4 @@ gevent
 gevent-websocket
 gunicorn
 eventlet
+python-engineio==3.0.0
